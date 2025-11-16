@@ -2,6 +2,8 @@ package com.habitus.apipi.controller;
 
 import com.habitus.apipi.entity.User;
 import com.habitus.apipi.service.UserService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +31,8 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<User> create(@RequestBody User user) {
+    @PostMapping    
+    public ResponseEntity<User> create(@Valid @RequestBody User user) {
         User created = userService.create(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }

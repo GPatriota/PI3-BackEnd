@@ -27,7 +27,7 @@ public class UserService {
 
     @Transactional
     public User create(User user) {
-        user.setId(null); // Ensure it's a new record
+        user.setId(null);
         return userRepository.save(user);
     }
 
