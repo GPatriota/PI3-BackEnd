@@ -16,7 +16,7 @@ public class HabitController {
 
     private final HabitService habitService;
 
-    @GetMapping
+    @GetMapping()
     public ResponseEntity<List<Habit>> findAll() {
         List<Habit> habits = habitService.findAll();
         return ResponseEntity.ok(habits);
