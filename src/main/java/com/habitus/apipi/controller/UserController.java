@@ -1,5 +1,6 @@
 package com.habitus.apipi.controller;
 
+import com.habitus.apipi.dto.LoginRequest;
 import com.habitus.apipi.entity.User;
 import com.habitus.apipi.service.UserService;
 
@@ -31,20 +32,18 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-@PostMapping("/auth")
-public ResponseEntity<User> auth(@RequestParam String email,
-                                 @RequestParam String password) {
+    @PostMapping("/auth")
+    public ResponseEntity<User> auth(@RequestBody LoginRequest request) {
+        User user = userService.auth(request.getEmail(), request.getPassword());
 
-    User user = userService.auth(email, password);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
 
-    if (user == null) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        return ResponseEntity.ok(user);
     }
 
-    return ResponseEntity.ok(user);
-}
-
-    @PostMapping    
+    @PostMapping
     public ResponseEntity<User> create(@Valid @RequestBody User user) {
         User created = userService.create(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
