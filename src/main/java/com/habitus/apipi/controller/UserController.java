@@ -31,6 +31,19 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+@PostMapping("/auth")
+public ResponseEntity<User> auth(@RequestParam String email,
+                                 @RequestParam String password) {
+
+    User user = userService.auth(email, password);
+
+    if (user == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    }
+
+    return ResponseEntity.ok(user);
+}
+
     @PostMapping    
     public ResponseEntity<User> create(@Valid @RequestBody User user) {
         User created = userService.create(user);

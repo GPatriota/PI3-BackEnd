@@ -49,4 +49,18 @@ public class UserService {
         return true;
     }
 
+public User auth(String email, String password) {
+    User user = userRepository.findByEmail(email);
+
+    if (user == null) {
+        return null; // email não existe
+    }
+
+    if (!user.getPassword().equals(password)) {
+        return null; // senha incorreta
+    }
+
+    return user; // login OK
+}
+
 }
