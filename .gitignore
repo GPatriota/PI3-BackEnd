@@ -140,4 +140,23 @@ fabric.properties
 hs_err_pid*
 replay_pid*
 
+### Spring Boot / Maven ###
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### VS Code ###
+.vscode/
+
+### Environment Variables ###
+.env
+.env.local
+.env.*.local
+
+### Application Properties (se tiver dados sensíveis) ###
+# Descomente se você usar arquivos diferentes para dev/prod
+# application-dev.properties
+# application-prod.properties
+
 # End of https://www.toptal.com/developers/gitignore/api/java,intellij

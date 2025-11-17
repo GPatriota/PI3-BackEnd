@@ -1,5 +1,7 @@
 package com.habitus.apipi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Habit {
 
     @Id
@@ -25,6 +28,7 @@ public class Habit {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idunidademedida", insertable = false, updatable = false)
+    @JsonIgnore
     private MeasurementUnit measurementUnit;
 
 }
