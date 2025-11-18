@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +28,20 @@ public class UserHabitService {
 
     @Transactional
     public UserHabit create(UserHabit userHabit) {
-        userHabit.setId(null); // Ensure it's a new record
+        Optional<UserHabit> existingActive = userHabitRepository.findByUserIdAndHabitIdAndEndDateIsNull(
+                userHabit.getUserId(),
+                userHabit.getHabitId());
+
+        if (existingActive.isPresent()) {
+            UserHabit activeHabit = existingActive.get();
+            activeHabit.setEndDate(LocalDate.now());
+            userHabitRepository.save(activeHabit);
+        }
+
+        userHabit.setId(null);
+        userHabit.setStartDate(LocalDate.now());
+        userHabit.setEndDate(null);
+
         return userHabitRepository.save(userHabit);
     }
 
