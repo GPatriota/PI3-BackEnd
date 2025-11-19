@@ -1,9 +1,14 @@
 package com.habitus.apipi.controller;
 
+import com.habitus.apipi.entity.MeasurementUnit;
 import com.habitus.apipi.service.MeasurementUnitService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/measurement-units")
@@ -11,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class MeasurementUnitController {
 
     private final MeasurementUnitService measurementUnitService;
-    // TODO: Fazer aqui as services se precisar fazer depois pra unidades de medida
-    // (como já sabemos todas, não vou fazer crud nem nada, só se precisar faz algo
-    // aqui)
+
+    @GetMapping
+    public ResponseEntity<List<MeasurementUnit>> findAll() {
+        return ResponseEntity.ok(measurementUnitService.findAll());
+    }
 }

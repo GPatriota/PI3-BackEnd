@@ -1,11 +1,15 @@
 package com.habitus.apipi.service;
 
+import com.habitus.apipi.dto.RecordCreateRequest;
 import com.habitus.apipi.entity.Record;
+import com.habitus.apipi.entity.UserHabit;
 import com.habitus.apipi.repository.RecordRepository;
+import com.habitus.apipi.repository.UserHabitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +18,7 @@ import java.util.Optional;
 public class RecordService {
 
     private final RecordRepository recordRepository;
+    private final UserHabitRepository userHabitRepository;
 
     @Transactional(readOnly = true)
     public List<Record> findAll() {
@@ -27,8 +32,25 @@ public class RecordService {
 
     @Transactional
     public Record create(Record record) {
-        record.setId(null); // Ensure it's a new record
+        record.setId(null); 
         return recordRepository.save(record);
+    }
+
+    @Transactional
+    public Optional<Record> createFromUserAndHabit(RecordCreateRequest req) {
+        Optional<UserHabit> activeUH = userHabitRepository
+                .findByUserIdAndHabitIdAndEndDateIsNull(req.getUserId(), req.getHabitId());
+
+        if (activeUH.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Record record = new Record();
+        record.setUserHabitId(activeUH.get().getId());
+        record.setValue(req.getValue());
+        record.setDate(req.getDate() != null ? req.getDate() : OffsetDateTime.now());
+        record.setId(null);
+        return Optional.of(recordRepository.save(record));
     }
 
     @Transactional
