@@ -26,6 +26,9 @@ public class UserHabit {
     @Column(name = "idhabito", nullable = false)
     private Long habitId;
 
+    @Column(name = "idunidademedida", nullable = false)
+    private Long measurementUnitId;
+
     @Column(name = "metadiaria", precision = 14, scale = 4)
     private BigDecimal dailyGoal;
 
@@ -45,5 +48,9 @@ public class UserHabit {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idhabito", insertable = false, updatable = false)
     private Habit habit;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idunidademedida", insertable = false, updatable = false)
+    private MeasurementUnit measurementUnit;
 
 }

@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MeasurementUnitRepository extends JpaRepository<MeasurementUnit, Long> {
+    java.util.Optional<MeasurementUnit> findByName(String name);
+    java.util.Optional<MeasurementUnit> findBySymbol(String symbol);
 }
