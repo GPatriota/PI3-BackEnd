@@ -6,8 +6,10 @@ import com.habitus.apipi.entity.UserHabit;
 import com.habitus.apipi.repository.MeasurementUnitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,6 +17,11 @@ import java.util.Optional;
 public class MeasurementUnitService {
 
     private final MeasurementUnitRepository measurementUnitRepository;
+
+    @Transactional(readOnly = true)
+    public List<MeasurementUnit> findAll() {
+        return measurementUnitRepository.findAll();
+    }
 
     public void applyConversionRules(UserHabit userHabit, Habit habit, MeasurementUnit currentUnit) {
         String habitName = habit.getName().toLowerCase();

@@ -1,5 +1,6 @@
 package com.habitus.apipi.controller;
 
+import com.habitus.apipi.dto.RecordCreateRequest;
 import com.habitus.apipi.entity.Record;
 import com.habitus.apipi.service.RecordService;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +31,10 @@ public class RecordController {
     }
 
     @PostMapping
-    public ResponseEntity<Record> create(@RequestBody Record record) {
-        Record created = recordService.create(record);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<Record> create(@RequestBody RecordCreateRequest request) {
+        return recordService.createFromUserAndHabit(request)
+                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
+                .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
     }
 
     @PutMapping("/{id}")

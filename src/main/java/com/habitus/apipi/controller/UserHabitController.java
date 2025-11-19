@@ -1,5 +1,6 @@
 package com.habitus.apipi.controller;
 
+import com.habitus.apipi.dto.UserHabitCreateRequest;
 import com.habitus.apipi.entity.UserHabit;
 import com.habitus.apipi.service.UserHabitService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,14 @@ public class UserHabitController {
     }
 
     @PostMapping
-    public ResponseEntity<UserHabit> create(@RequestBody UserHabit userHabit) {
+    public ResponseEntity<UserHabit> create(@RequestBody UserHabitCreateRequest request) {
+        UserHabit userHabit = new UserHabit();
+        userHabit.setUserId(request.getUserId());
+        userHabit.setHabitId(request.getHabitId());
+        userHabit.setMeasurementUnitId(request.getMeasurementUnitId());
+        userHabit.setDailyGoal(request.getDailyGoal());
+        userHabit.setWeeklyFrequency(request.getWeeklyFrequency());
+
         UserHabit created = userHabitService.create(userHabit);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
