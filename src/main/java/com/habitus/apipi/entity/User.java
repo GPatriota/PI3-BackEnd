@@ -1,5 +1,6 @@
 package com.habitus.apipi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // Import Adicionado
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -13,6 +14,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+// Esta anotação impede o erro se o sistema tentar serializar um proxy de User
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
 
     @Id
