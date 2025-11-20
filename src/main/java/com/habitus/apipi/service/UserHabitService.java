@@ -1,6 +1,10 @@
 package com.habitus.apipi.service;
 
+import com.habitus.apipi.entity.Habit;
+import com.habitus.apipi.entity.MeasurementUnit;
 import com.habitus.apipi.entity.UserHabit;
+import com.habitus.apipi.repository.HabitRepository;
+import com.habitus.apipi.repository.MeasurementUnitRepository;
 import com.habitus.apipi.repository.UserHabitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +19,9 @@ import java.util.Optional;
 public class UserHabitService {
 
     private final UserHabitRepository userHabitRepository;
+    private final HabitRepository habitRepository;
+    private final MeasurementUnitRepository measurementUnitRepository;
+    private final MeasurementUnitService measurementUnitService;
 
     @Transactional(readOnly = true)
     public List<UserHabit> findAll() {
@@ -28,6 +35,10 @@ public class UserHabitService {
 
     @Transactional
     public UserHabit create(UserHabit userHabit) {
+        if (userHabit.getHabitId() == null) {
+            throw new IllegalArgumentException("Habit ID cannot be null");
+        }
+
         Optional<UserHabit> existingActive = userHabitRepository.findByUserIdAndHabitIdAndEndDateIsNull(
                 userHabit.getUserId(),
                 userHabit.getHabitId());
@@ -36,6 +47,24 @@ public class UserHabitService {
             UserHabit activeHabit = existingActive.get();
             activeHabit.setEndDate(LocalDate.now());
             userHabitRepository.save(activeHabit);
+        }
+
+        // Regra de negócio: Conversão de unidades
+        Optional<Habit> habitOpt = habitRepository.findById(userHabit.getHabitId());
+        
+        if (habitOpt.isPresent()) {
+            // Se a unidade de medida não for informada, usa a padrão do hábito
+            if (userHabit.getMeasurementUnitId() == null) {
+                userHabit.setMeasurementUnitId(habitOpt.get().getMeasurementUnitId());
+            }
+        }
+
+        if (userHabit.getMeasurementUnitId() != null) {
+            Optional<MeasurementUnit> unitOpt = measurementUnitRepository.findById(userHabit.getMeasurementUnitId());
+
+            if (habitOpt.isPresent() && unitOpt.isPresent()) {
+                measurementUnitService.applyConversionRules(userHabit, habitOpt.get(), unitOpt.get());
+            }
         }
 
         userHabit.setId(null);
