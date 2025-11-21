@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,7 @@ public class RecordService {
 
     @Transactional
     public Record create(Record record) {
-        record.setId(null); 
+        record.setId(null);
         return recordRepository.save(record);
     }
 
@@ -69,6 +70,11 @@ public class RecordService {
         }
         recordRepository.deleteById(id);
         return true;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Record> findByUserAndDate(Long userId, LocalDate date) {
+        return recordRepository.findByUserIdAndDate(userId, date);
     }
 
 }
