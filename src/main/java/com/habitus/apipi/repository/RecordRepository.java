@@ -18,4 +18,15 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
            "AND CAST(r.date AS date) = :date")
     List<Record> findByUserIdAndDate(@Param("userId") Long userId, @Param("date") LocalDate date);
     
+    @Query(value = "SELECT * FROM registros r " +
+           "WHERE r.idusuariohabito = :userHabitId " +
+           "AND (r.data AT TIME ZONE 'UTC' AT TIME ZONE 'America/Sao_Paulo')::date BETWEEN :dataInicio AND :dataFim " +
+           "ORDER BY r.data ASC", 
+           nativeQuery = true)
+    List<Record> findByUserHabitIdAndDateRange(
+        @Param("userHabitId") Long userHabitId, 
+        @Param("dataInicio") LocalDate dataInicio, 
+        @Param("dataFim") LocalDate dataFim
+    );
+    
 }
