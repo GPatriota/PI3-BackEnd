@@ -1,6 +1,7 @@
 package com.habitus.apipi.controller;
 
 import com.habitus.apipi.dto.UserHabitCreateRequest;
+import com.habitus.apipi.dto.UserHabitSummaryDTO;
 import com.habitus.apipi.entity.UserHabit;
 import com.habitus.apipi.service.UserHabitService;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,12 @@ public class UserHabitController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         boolean deleted = userHabitService.delete(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<UserHabitSummaryDTO>> findByUserId(@PathVariable Long userId) {
+        List<UserHabitSummaryDTO> userHabits = userHabitService.findByUserId(userId);
+        return ResponseEntity.ok(userHabits);
     }
 
 }

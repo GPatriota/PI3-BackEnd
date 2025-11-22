@@ -1,5 +1,6 @@
 package com.habitus.apipi.service;
 
+import com.habitus.apipi.dto.UserHabitSummaryDTO;
 import com.habitus.apipi.entity.Habit;
 import com.habitus.apipi.entity.MeasurementUnit;
 import com.habitus.apipi.entity.UserHabit;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -90,6 +92,25 @@ public class UserHabitService {
         }
         userHabitRepository.deleteById(id);
         return true;
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserHabitSummaryDTO> findByUserId(Long userId) {
+        List<UserHabit> userHabits = userHabitRepository.findByUserId(userId);
+        return userHabits.stream()
+            .map(uh -> new UserHabitSummaryDTO(
+                uh.getId(),
+                uh.getUserId(),
+                uh.getHabitId(),
+                uh.getHabit() != null ? uh.getHabit().getName() : null,
+                uh.getMeasurementUnitId(),
+                uh.getMeasurementUnit() != null ? uh.getMeasurementUnit().getSymbol() : null,
+                uh.getDailyGoal(),
+                uh.getWeeklyFrequency(),
+                uh.getStartDate(),
+                uh.getEndDate()
+            ))
+            .collect(Collectors.toList());
     }
 
 }
