@@ -89,22 +89,26 @@ public class RecordService {
 
     @Transactional(readOnly = true)
     public Optional<HistoricoMetricasResponse> getHistoricoByUserAndHabit(Long userId, Long habitId, LocalDate dataInicio, LocalDate dataFim) {
-        // Busca o UserHabit ativo do usuário para esse hábito
-        Optional<UserHabit> userHabitOpt = userHabitRepository.findByUserIdAndHabitIdAndEndDateIsNull(userId, habitId);
-        if (userHabitOpt.isEmpty()) {
+        // Busca TODOS os UserHabits (ativos e inativos) do usuário para esse hábito
+        List<UserHabit> allUserHabits = userHabitRepository.findByUserIdAndHabitId(userId, habitId);
+        if (allUserHabits.isEmpty()) {
             return Optional.empty();
         }
         
-        UserHabit userHabit = userHabitOpt.get();
-        Long idUsuarioHabito = userHabit.getId();
+        // Pega o primeiro para informações básicas (nome do hábito, unidade)
+        UserHabit referenceUserHabit = allUserHabits.get(0);
         
-        // Busca todos os registros no período
-        List<Record> records = recordRepository.findByUserHabitIdAndDateRange(idUsuarioHabito, dataInicio, dataFim);
+        // Busca todos os registros de TODOS os UserHabits no período
+        List<Record> allRecords = new ArrayList<>();
+        for (UserHabit uh : allUserHabits) {
+            List<Record> records = recordRepository.findByUserHabitIdAndDateRange(uh.getId(), dataInicio, dataFim);
+            allRecords.addAll(records);
+        }
         
         // Agrupa os registros por data e soma os valores
         // Converte para o fuso horário de São Paulo antes de extrair a data
         ZoneId saoPauloZone = ZoneId.of("America/Sao_Paulo");
-        Map<LocalDate, BigDecimal> dailyTotals = records.stream()
+        Map<LocalDate, BigDecimal> dailyTotals = allRecords.stream()
             .collect(Collectors.groupingBy(
                 r -> r.getDate().atZoneSameInstant(saoPauloZone).toLocalDate(),
                 Collectors.reducing(
@@ -115,46 +119,74 @@ public class RecordService {
             ));
         
         // Cria lista de datas completa (incluindo dias sem registro)
-        List<GraficoItemDTO> grafico = new ArrayList<>();
+        List<GraficoItemDTO> chart = new ArrayList<>();
         LocalDate currentDate = dataInicio;
         while (!currentDate.isAfter(dataFim)) {
             BigDecimal total = dailyTotals.getOrDefault(currentDate, BigDecimal.ZERO);
-            grafico.add(new GraficoItemDTO(currentDate, total));
+            
+            // Determina qual era a meta diária ativa nesta data
+            BigDecimal dailyGoal = getDailyGoalForDate(allUserHabits, currentDate);
+            
+            chart.add(new GraficoItemDTO(currentDate, total, dailyGoal));
             currentDate = currentDate.plusDays(1);
         }
         
         // Calcula métricas
-        BigDecimal mediaSemanal = BigDecimal.ZERO;
-        BigDecimal melhorRegistro = BigDecimal.ZERO;
+        BigDecimal weeklyAverage = BigDecimal.ZERO;
+        BigDecimal bestRecord = BigDecimal.ZERO;
         
         if (!dailyTotals.isEmpty()) {
-            BigDecimal somaTotal = dailyTotals.values().stream()
+            BigDecimal totalSum = dailyTotals.values().stream()
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
             
-            int diasComRegistro = dailyTotals.size();
-            mediaSemanal = somaTotal.divide(
-                BigDecimal.valueOf(diasComRegistro), 
+            int daysWithRecords = dailyTotals.size();
+            weeklyAverage = totalSum.divide(
+                BigDecimal.valueOf(daysWithRecords), 
                 2, 
                 RoundingMode.HALF_UP
             );
             
-            melhorRegistro = dailyTotals.values().stream()
+            bestRecord = dailyTotals.values().stream()
                 .max(BigDecimal::compareTo)
                 .orElse(BigDecimal.ZERO);
         }
         
+        // Pega a meta diária atual (do UserHabit ativo ou do mais recente)
+        UserHabit currentUserHabit = allUserHabits.stream()
+            .filter(uh -> uh.getEndDate() == null)
+            .findFirst()
+            .orElse(allUserHabits.get(allUserHabits.size() - 1));
+        
         // Monta a resposta
-        MetaInfoDTO metaInfo = new MetaInfoDTO(
-            userHabit.getHabit().getName(),
-            userHabit.getMeasurementUnit().getSymbol(),
-            userHabit.getDailyGoal()
+        MetaInfoDTO info = new MetaInfoDTO(
+            referenceUserHabit.getHabit().getName(),
+            referenceUserHabit.getMeasurementUnit().getSymbol(),
+            currentUserHabit.getDailyGoal()
         );
         
-        MetricasDTO metricas = new MetricasDTO(mediaSemanal, melhorRegistro);
+        MetricasDTO metrics = new MetricasDTO(weeklyAverage, bestRecord);
         
-        HistoricoMetricasResponse response = new HistoricoMetricasResponse(metaInfo, metricas, grafico);
+        HistoricoMetricasResponse response = new HistoricoMetricasResponse(info, metrics, chart);
         
         return Optional.of(response);
+    }
+    
+    private BigDecimal getDailyGoalForDate(List<UserHabit> userHabits, LocalDate date) {
+        // Procura qual UserHabit estava ativo nesta data específica
+        for (UserHabit uh : userHabits) {
+            LocalDate startDate = uh.getStartDate();
+            LocalDate endDate = uh.getEndDate();
+            
+            boolean isAfterOrEqualStart = startDate == null || !date.isBefore(startDate);
+            boolean isBeforeOrEqualEnd = endDate == null || !date.isAfter(endDate);
+            
+            if (isAfterOrEqualStart && isBeforeOrEqualEnd) {
+                return uh.getDailyGoal() != null ? uh.getDailyGoal() : BigDecimal.ZERO;
+            }
+        }
+        
+        // Se não encontrou nenhum UserHabit ativo nesta data, retorna 0
+        return BigDecimal.ZERO;
     }
 
 }

@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetaInfoDTO {
-    private String nome;
-    private String unidade;
-    private BigDecimal metaDiaria;
+    private String name;
+    private String unit;
+    private BigDecimal dailyGoal;
 }

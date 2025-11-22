@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GraficoItemDTO {
-    private LocalDate data;
+    private LocalDate date;
     private BigDecimal total;
+    private BigDecimal dailyGoal;
 }

@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HistoricoMetricasResponse {
-    private MetaInfoDTO metaInfo;
-    private MetricasDTO metricas;
-    private List<GraficoItemDTO> grafico;
+    private MetaInfoDTO info;
+    private MetricasDTO metrics;
+    private List<GraficoItemDTO> chart;
 }
