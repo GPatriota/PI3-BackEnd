@@ -177,10 +177,14 @@ public class RecordService {
             LocalDate startDate = uh.getStartDate();
             LocalDate endDate = uh.getEndDate();
             
+            // Data deve estar >= startDate
             boolean isAfterOrEqualStart = startDate == null || !date.isBefore(startDate);
-            boolean isBeforeOrEqualEnd = endDate == null || !date.isAfter(endDate);
             
-            if (isAfterOrEqualStart && isBeforeOrEqualEnd) {
+            // Data deve estar < endDate (endDate é exclusivo, já pertence ao próximo período)
+            // Se endDate é null, UserHabit está ativo indefinidamente
+            boolean isBeforeEnd = endDate == null || date.isBefore(endDate);
+            
+            if (isAfterOrEqualStart && isBeforeEnd) {
                 return uh.getDailyGoal() != null ? uh.getDailyGoal() : BigDecimal.ZERO;
             }
         }
