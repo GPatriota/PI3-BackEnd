@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface UserHabitRepository extends JpaRepository<UserHabit, Long> {
     Optional<UserHabit> findByUserIdAndHabitIdAndEndDateIsNull(Long userId, Long habitId);
     List<UserHabit> findByUserId(Long userId);
+    List<UserHabit> findByUserIdAndHabitId(Long userId, Long habitId);
 }

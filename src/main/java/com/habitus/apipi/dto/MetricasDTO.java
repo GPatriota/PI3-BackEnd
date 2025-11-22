@@ -10,6 +10,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetricasDTO {
-    private BigDecimal mediaSemanal;
-    private BigDecimal melhorRegistro;
+    private BigDecimal weeklyAverage;
+    private BigDecimal bestRecord;
 }
