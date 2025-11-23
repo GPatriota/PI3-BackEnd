@@ -1,5 +1,6 @@
 package com.habitus.apipi.service;
 
+import com.habitus.apipi.dto.UserHabitCreateRequest;
 import com.habitus.apipi.dto.UserHabitSummaryDTO;
 import com.habitus.apipi.entity.Habit;
 import com.habitus.apipi.entity.MeasurementUnit;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +23,6 @@ import java.util.stream.Collectors;
 public class UserHabitService {
 
     private final UserHabitRepository userHabitRepository;
-    private final HabitRepository habitRepository;
-    private final MeasurementUnitRepository measurementUnitRepository;
-    private final MeasurementUnitService measurementUnitService;
 
     @Transactional(readOnly = true)
     public List<UserHabit> findAll() {
@@ -36,42 +35,37 @@ public class UserHabitService {
     }
 
     @Transactional
-    public UserHabit create(UserHabit userHabit) {
-        if (userHabit.getHabitId() == null) {
-            throw new IllegalArgumentException("Habit ID cannot be null");
+    public UserHabit create(UserHabitCreateRequest request) {
+        Optional<UserHabit> existingUserHabit = userHabitRepository
+                .findByUserIdAndHabitIdAndEndDateIsNull(request.getUserId(), request.getHabitId());
+
+        if (existingUserHabit.isPresent()) {
+            UserHabit existing = existingUserHabit.get();
+            existing.setEndDate(LocalDate.now());
+            userHabitRepository.save(existing);
         }
 
-        Optional<UserHabit> existingActive = userHabitRepository.findByUserIdAndHabitIdAndEndDateIsNull(
-                userHabit.getUserId(),
-                userHabit.getHabitId());
+        BigDecimal dailyGoal = request.getDailyGoal();
+        Long measurementUnitId = request.getMeasurementUnitId();
 
-        if (existingActive.isPresent()) {
-            UserHabit activeHabit = existingActive.get();
-            activeHabit.setEndDate(LocalDate.now());
-            userHabitRepository.save(activeHabit);
+        if (measurementUnitId == 2) {
+            dailyGoal = dailyGoal.multiply(new BigDecimal("1000"));
+            measurementUnitId = 1L;
+        } else if (measurementUnitId == 4) {
+            dailyGoal = dailyGoal.multiply(new BigDecimal("60"));
+            measurementUnitId = 3L;
         }
 
-        Optional<Habit> habitOpt = habitRepository.findById(userHabit.getHabitId());
+        UserHabit newUserHabit = new UserHabit();
+        newUserHabit.setUserId(request.getUserId());
+        newUserHabit.setHabitId(request.getHabitId());
+        newUserHabit.setMeasurementUnitId(measurementUnitId);
+        newUserHabit.setDailyGoal(dailyGoal);
+        newUserHabit.setWeeklyFrequency(request.getWeeklyFrequency());
+        newUserHabit.setStartDate(LocalDate.now());
+        newUserHabit.setEndDate(null);
 
-        if (habitOpt.isPresent()) {
-            if (userHabit.getMeasurementUnitId() == null) {
-                userHabit.setMeasurementUnitId(habitOpt.get().getMeasurementUnitId());
-            }
-        }
-
-        if (userHabit.getMeasurementUnitId() != null) {
-            Optional<MeasurementUnit> unitOpt = measurementUnitRepository.findById(userHabit.getMeasurementUnitId());
-
-            if (habitOpt.isPresent() && unitOpt.isPresent()) {
-                measurementUnitService.applyConversionRules(userHabit, habitOpt.get(), unitOpt.get());
-            }
-        }
-
-        userHabit.setId(null);
-        userHabit.setStartDate(LocalDate.now());
-        userHabit.setEndDate(null);
-
-        return userHabitRepository.save(userHabit);
+        return userHabitRepository.save(newUserHabit);
     }
 
     @Transactional

@@ -23,36 +23,4 @@ public class MeasurementUnitService {
         return measurementUnitRepository.findAll();
     }
 
-    public void applyConversionRules(UserHabit userHabit, Habit habit, MeasurementUnit currentUnit) {
-        String habitName = habit.getName().toLowerCase();
-        String unitName = currentUnit.getName().toLowerCase();
-
-        if (habitName.contains("água") || habitName.contains("agua")) {
-            if (unitName.contains("litro") && !unitName.contains("mili")) {
-                userHabit.setDailyGoal(userHabit.getDailyGoal().multiply(new BigDecimal("1000")));
-
-                Optional<MeasurementUnit> mlUnit = measurementUnitRepository.findByName("Mililitros");
-                if (mlUnit.isEmpty()) {
-                    mlUnit = measurementUnitRepository.findBySymbol("ml");
-                }
-
-                mlUnit.ifPresent(measurementUnit -> userHabit.setMeasurementUnitId(measurementUnit.getId()));
-            }
-        }
-
-        if (habitName.contains("sono") || habitName.contains("dormir")) {
-            if (unitName.contains("hora")) {
-                userHabit.setDailyGoal(userHabit.getDailyGoal().multiply(new BigDecimal("60")));
-
-                Optional<MeasurementUnit> minUnit = measurementUnitRepository.findByName("Minutos");
-                if (minUnit.isEmpty()) {
-                    minUnit = measurementUnitRepository.findBySymbol("min");
-                }
-
-                minUnit.ifPresent(measurementUnit -> userHabit.setMeasurementUnitId(measurementUnit.getId()));
-            }
-        }
-        
-    }
-
 }

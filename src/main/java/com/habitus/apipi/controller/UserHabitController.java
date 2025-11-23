@@ -33,15 +33,8 @@ public class UserHabitController {
 
     @PostMapping
     public ResponseEntity<UserHabit> create(@RequestBody UserHabitCreateRequest request) {
-        UserHabit userHabit = new UserHabit();
-        userHabit.setUserId(request.getUserId());
-        userHabit.setHabitId(request.getHabitId());
-        userHabit.setMeasurementUnitId(request.getMeasurementUnitId());
-        userHabit.setDailyGoal(request.getDailyGoal());
-        userHabit.setWeeklyFrequency(request.getWeeklyFrequency());
-
-        UserHabit created = userHabitService.create(userHabit);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        UserHabit createdUserHabit = userHabitService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUserHabit);
     }
 
     @PutMapping("/{id}")
