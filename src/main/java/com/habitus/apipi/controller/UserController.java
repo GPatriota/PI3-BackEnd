@@ -1,6 +1,7 @@
 package com.habitus.apipi.controller;
 
 import com.habitus.apipi.dto.LoginRequest;
+import com.habitus.apipi.dto.UpdateUserRequest;
 import com.habitus.apipi.entity.User;
 import com.habitus.apipi.service.UserService;
 
@@ -50,10 +51,15 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user) {
-        return userService.update(id, user)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UpdateUserRequest req) {
+        try {
+            return userService
+                    .updatePartial(id, req.getName(), req.getEmail(), req.getOldPassword(), req.getNewPassword())
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")

@@ -71,6 +71,45 @@ public class UserService {
     }
 
     @Transactional
+    public Optional<User> updatePartial(Long id, String name, String email, String oldPassword, String newPassword) {
+        Optional<User> opt = userRepository.findById(id);
+        if (opt.isEmpty()) {
+            return Optional.empty();
+        }
+        User entity = opt.get();
+
+        if (email != null && !email.equals(entity.getEmail())) {
+            User existing = userRepository.findByEmail(email);
+            if (existing != null && !existing.getId().equals(id)) {
+                throw new IllegalArgumentException("Email já cadastrado por outro usuário");
+            }
+            entity.setEmail(email);
+        }
+
+        if (name != null) {
+            entity.setName(name);
+        }
+
+        boolean wantsPasswordChange = oldPassword != null || newPassword != null;
+        if (wantsPasswordChange) {
+            if (oldPassword == null || newPassword == null) {
+                throw new IllegalArgumentException("Para alterar a senha envie oldPassword e newPassword");
+            }
+    
+            if (!entity.getPassword().equals(oldPassword)) {
+                throw new IllegalArgumentException("Senha atual incorreta");
+            }
+
+            if (newPassword.trim().length() < 8) {
+                throw new IllegalArgumentException("A nova senha deve ter pelo menos 8 caracteres");
+            }
+            entity.setPassword(newPassword);
+        }
+
+        return Optional.of(userRepository.save(entity));
+    }
+
+    @Transactional
     public boolean delete(Long id) {
         if (!userRepository.existsById(id)) {
             return false;
