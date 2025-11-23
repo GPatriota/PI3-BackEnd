@@ -39,7 +39,7 @@ public class UserService {
         if (existingUser != null) {
             throw new IllegalArgumentException("Já existe um usuário cadastrado com o email: " + user.getEmail());
         }
-        
+
         user.setId(null);
         User savedUser = userRepository.save(user);
 
