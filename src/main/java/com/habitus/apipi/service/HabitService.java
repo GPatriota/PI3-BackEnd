@@ -27,7 +27,7 @@ public class HabitService {
 
     @Transactional
     public Habit create(Habit habit) {
-        habit.setId(null); // Ensure it's a new record
+        habit.setId(null);
         return habitRepository.save(habit);
     }
 

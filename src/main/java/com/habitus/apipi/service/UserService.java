@@ -83,14 +83,14 @@ public class UserService {
         User user = userRepository.findByEmail(email);
 
         if (user == null) {
-            return null; // email não existe
+            return null;
         }
 
         if (!user.getPassword().equals(password)) {
-            return null; // senha incorreta
+            return null;
         }
 
-        return user; // login OK
+        return user;
     }
 
 }

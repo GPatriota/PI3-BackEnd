@@ -1,6 +1,6 @@
 package com.habitus.apipi.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // Import Adicionado
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,8 +14,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-// Esta anotação impede o erro "ByteBuddyInterceptor" ao converter para JSON
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class UserHabit {
 
     @Id
@@ -48,12 +47,10 @@ public class UserHabit {
     @JoinColumn(name = "idusuario", insertable = false, updatable = false)
     private User user;
 
-    // Mudei para EAGER para garantir que o nome do Hábito apareça no Dashboard
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idhabito", insertable = false, updatable = false)
     private Habit habit;
 
-    // Mudei para EAGER para garantir que a sigla da Unidade apareça no Dashboard
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idunidademedida", insertable = false, updatable = false)
     private MeasurementUnit measurementUnit;

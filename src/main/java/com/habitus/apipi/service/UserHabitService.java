@@ -51,11 +51,9 @@ public class UserHabitService {
             userHabitRepository.save(activeHabit);
         }
 
-        // Regra de negócio: Conversão de unidades
         Optional<Habit> habitOpt = habitRepository.findById(userHabit.getHabitId());
-        
+
         if (habitOpt.isPresent()) {
-            // Se a unidade de medida não for informada, usa a padrão do hábito
             if (userHabit.getMeasurementUnitId() == null) {
                 userHabit.setMeasurementUnitId(habitOpt.get().getMeasurementUnitId());
             }
@@ -98,19 +96,18 @@ public class UserHabitService {
     public List<UserHabitSummaryDTO> findByUserId(Long userId) {
         List<UserHabit> userHabits = userHabitRepository.findByUserId(userId);
         return userHabits.stream()
-            .map(uh -> new UserHabitSummaryDTO(
-                uh.getId(),
-                uh.getUserId(),
-                uh.getHabitId(),
-                uh.getHabit() != null ? uh.getHabit().getName() : null,
-                uh.getMeasurementUnitId(),
-                uh.getMeasurementUnit() != null ? uh.getMeasurementUnit().getSymbol() : null,
-                uh.getDailyGoal(),
-                uh.getWeeklyFrequency(),
-                uh.getStartDate(),
-                uh.getEndDate()
-            ))
-            .collect(Collectors.toList());
+                .map(uh -> new UserHabitSummaryDTO(
+                        uh.getId(),
+                        uh.getUserId(),
+                        uh.getHabitId(),
+                        uh.getHabit() != null ? uh.getHabit().getName() : null,
+                        uh.getMeasurementUnitId(),
+                        uh.getMeasurementUnit() != null ? uh.getMeasurementUnit().getSymbol() : null,
+                        uh.getDailyGoal(),
+                        uh.getWeeklyFrequency(),
+                        uh.getStartDate(),
+                        uh.getEndDate()))
+                .collect(Collectors.toList());
     }
 
 }
