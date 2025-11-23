@@ -1,6 +1,7 @@
 package com.habitus.apipi.controller;
 
 import com.habitus.apipi.dto.UserHabitCreateRequest;
+import com.habitus.apipi.dto.UserHabitUpdateRequest;
 import com.habitus.apipi.dto.UserHabitSummaryDTO;
 import com.habitus.apipi.entity.UserHabit;
 import com.habitus.apipi.service.UserHabitService;
@@ -19,8 +20,10 @@ public class UserHabitController {
     private final UserHabitService userHabitService;
 
     @GetMapping
-    public ResponseEntity<List<UserHabit>> findAll() {
-        List<UserHabit> userHabits = userHabitService.findAll();
+    public ResponseEntity<List<UserHabitSummaryDTO>> findAll(
+            @RequestParam Long userId,
+            @RequestParam(required = false) Long habitId) {
+        List<UserHabitSummaryDTO> userHabits = userHabitService.findWithFilters(userId, habitId);
         return ResponseEntity.ok(userHabits);
     }
 
@@ -38,22 +41,16 @@ public class UserHabitController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserHabit> update(@PathVariable Long id, @RequestBody UserHabit userHabit) {
-        return userHabitService.update(id, userHabit)
+    public ResponseEntity<UserHabit> update(@PathVariable Long id, @RequestBody UserHabitUpdateRequest request) {
+        return userHabitService.update(id, request)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        boolean deleted = userHabitService.delete(id);
-        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserHabitSummaryDTO>> findByUserId(@PathVariable Long userId) {
-        List<UserHabitSummaryDTO> userHabits = userHabitService.findByUserId(userId);
-        return ResponseEntity.ok(userHabits);
+    public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam Long userId) {
+        boolean deleted = userHabitService.deleteByIdAndUserId(id, userId);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
 }
