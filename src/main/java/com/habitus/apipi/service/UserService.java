@@ -35,6 +35,11 @@ public class UserService {
 
     @Transactional
     public User create(User user) {
+        User existingUser = userRepository.findByEmail(user.getEmail());
+        if (existingUser != null) {
+            throw new IllegalArgumentException("Já existe um usuário cadastrado com o email: " + user.getEmail());
+        }
+        
         user.setId(null);
         User savedUser = userRepository.save(user);
 

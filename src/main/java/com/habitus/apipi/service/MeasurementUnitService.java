@@ -27,7 +27,6 @@ public class MeasurementUnitService {
         String habitName = habit.getName().toLowerCase();
         String unitName = currentUnit.getName().toLowerCase();
 
-        // Caso 1: Água em Litros -> Mililitros
         if (habitName.contains("água") || habitName.contains("agua")) {
             if (unitName.contains("litro") && !unitName.contains("mili")) {
                 userHabit.setDailyGoal(userHabit.getDailyGoal().multiply(new BigDecimal("1000")));
@@ -41,7 +40,6 @@ public class MeasurementUnitService {
             }
         }
 
-        // Caso 2: Sono em Horas -> Minutos
         if (habitName.contains("sono") || habitName.contains("dormir")) {
             if (unitName.contains("hora")) {
                 userHabit.setDailyGoal(userHabit.getDailyGoal().multiply(new BigDecimal("60")));
