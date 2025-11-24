@@ -1,0 +1,90 @@
+BEGIN;
+ 
+-- Remove as tabelas se já existirem (ordem certa por FK)
+DROP TABLE IF EXISTS registros       CASCADE;
+DROP TABLE IF EXISTS usuariosHabitos CASCADE;
+DROP TABLE IF EXISTS habitos         CASCADE;
+DROP TABLE IF EXISTS unidadesMedida  CASCADE;
+DROP TABLE IF EXISTS usuarios        CASCADE;
+ 
+-- =========================
+-- Tabela: usuarios
+-- =========================
+CREATE TABLE usuarios (
+    id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nome    TEXT,
+    email   TEXT,
+    senha   TEXT
+);
+ 
+-- =========================
+-- Tabela: unidadesMedida
+-- =========================
+CREATE TABLE unidadesMedida (
+    id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nome     TEXT,
+    simbolo  TEXT
+);
+ 
+-- Inserindo unidades de medida padrão
+INSERT INTO unidadesMedida (nome, simbolo) VALUES
+('Mililitros', 'ml'),
+('Litros', 'l'),
+('Minutos', 'min'),
+('Horas', 'h');
+ 
+-- =========================
+-- Tabela: habitos
+-- =========================
+CREATE TABLE habitos (
+    id               BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    idUnidadeMedida  BIGINT NOT NULL,
+    nome             TEXT,
+    CONSTRAINT fk_habitos_unidade
+        FOREIGN KEY (idUnidadeMedida)
+        REFERENCES unidadesMedida(id)
+);
+ 
+insert into habitos (idunidademedida, nome) 
+values 
+(1, 'Beber agua'), 
+(3, 'Dormir'), 
+(3, 'Praticar atividades fisicas');
+ 
+-- =========================
+-- Tabela: usuariosHabitos
+-- =========================
+CREATE TABLE usuariosHabitos (
+    id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    idUsuario          BIGINT NOT NULL,
+    idHabito           BIGINT NOT NULL,
+    idUnidadeMedida    BIGINT NOT NULL,
+    metaDiaria         NUMERIC(14,4),
+    frequenciaSemanal  SMALLINT,
+    dataInicio         DATE,
+    dataFim            DATE,
+    CONSTRAINT fk_uh_usuario
+        FOREIGN KEY (idUsuario)
+        REFERENCES usuarios(id),
+    CONSTRAINT fk_uh_habito
+        FOREIGN KEY (idHabito)
+        REFERENCES habitos(id),
+    CONSTRAINT fk_uh_unidade
+        FOREIGN KEY (idUnidadeMedida)
+        REFERENCES unidadesMedida(id)
+);
+ 
+-- =========================
+-- Tabela: registros
+-- =========================
+CREATE TABLE registros (
+    id               BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    idUsuarioHabito  BIGINT NOT NULL,
+    valor            NUMERIC(14,4),
+    data             TIMESTAMPTZ,
+    CONSTRAINT fk_reg_uh
+        FOREIGN KEY (idUsuarioHabito)
+        REFERENCES usuariosHabitos(id)
+);
+ 
+COMMIT;
